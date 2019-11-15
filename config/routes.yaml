@@ -1,0 +1,20 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+register:
+    path: /user/register
+    controller: App\Controller\UserController::register
+    methods: POST
+
+api:
+    path: /api
+    controller: App\Controller\UserController::api
+
+depotRetrait:
+    path: /api/depotRetrait
+    controller: App\Controller\DepotRetraitController::DepotRetrait
+
+
+login_check:
+    path:     /login_check
+    methods:  [POST]
