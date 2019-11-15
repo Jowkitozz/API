@@ -15,17 +15,17 @@ class TransferController extends AbstractController
      */
     public function intern(Request $request)
     {
+        // Ici on récupère les données entrées dans le formulaire
         $data = json_decode($request->getContent(), true);
         $Emetteur = $data['compteEmetteur'];
         $Recepteur = $data['compteRecepteur'];
         $Solde = $data['sold'];
-        var_dump($Emetteur);
-        var_dump($Recepteur);
-        var_dump($Solde);
 
         $em = $this->getDoctrine()->getManager();
+        // Ici on récupère les informations du compte émetteur
         $emetteur = $em->getRepository(User::class)->findOneBy(array('numberAccount' => $Emetteur));
         $emetteur->setSold($emetteur->getSold() - $Solde);
+        // Ici on récupère les informations du compte récepteur
         $recepteur = $em->getRepository(User::class)->findOneBy(array('numberAccount' => $Recepteur));
         $recepteur->setSold($recepteur->getSold() + $Solde);
         $em->flush();
