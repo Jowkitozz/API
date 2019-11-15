@@ -1,0 +1,392 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentation de l'API Bancaire",
+    "version": "1.0.0",
+    "title": "API Bancaire Module Web Service",
+    "contact": {
+      "email": "jxerri145@gmail.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "tags": [
+    {
+      "name": "USER",
+      "description": "Opération concernant les utilisateurs"
+    },
+    {
+      "name": "BANQUE",
+      "description": "Opération concernant les dépots, retraits et les virements"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/user/register": {
+      "post": {
+        "tags": [
+          "USER"
+        ],
+        "summary": "Crée un utilisateur",
+        "description": "",
+        "operationId": "register",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "User",
+            "description": "Cette fonction permet la création d'un compte utilisateur.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User_register"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur est bien inscrit"
+          },
+          "401": {
+            "description": "L'utilisateur n'est pas authentifié"
+          },
+          "405": {
+            "description": "Il y a une erreur dans le formulaire"
+          }
+        },
+        "security": [
+          {
+            "user_auth": [
+              "write:users",
+              "read:users"
+            ]
+          }
+        ]
+      }
+    },
+    "/login_check": {
+      "post": {
+        "tags": [
+          "USER"
+        ],
+        "summary": "Authentifier un utilisateur",
+        "description": "Cette fonction permet d'authentifier un utilisateur et de lui affecter un token",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "User",
+            "description": "Cette fonction permet la connexion d'un compte utilisateur.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User_login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur est bien connecté"
+          },
+          "400": {
+            "description": "Une erreur est survenue"
+          }
+        },
+        "security": [
+          {
+            "user_auth": [
+              "write:users",
+              "read:users"
+            ]
+          }
+        ]
+      }
+    },
+    "/user/logout": {
+      "post": {
+        "tags": [
+          "USER"
+        ],
+        "summary": "Déconnexion d'un utilisateur",
+        "description": "",
+        "operationId": "logoutUser",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur est bien déconnecté"
+          }
+        }
+      }
+    },
+    "/api/depotRetrait": {
+      "post": {
+        "tags": [
+          "BANQUE"
+        ],
+        "summary": "Cette fonction permet de déposer ou de retié de l'argent",
+        "description": "",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Cette fonction permet de déposer de l'argent sur son compte ou en retirer. En fonction du montant, celui-ci va détecter s'il s'agit d'un dépot ou d'un retrait.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Money"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dépôt/Retrait réussit"
+          },
+          "400": {
+            "description": "Une erreur est survenue"
+          }
+        },
+        "security": [
+          {
+            "user_auth": [
+              "write:users",
+              "read:users"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/transfer_intern": {
+      "post": {
+        "tags": [
+          "BANQUE"
+        ],
+        "summary": "Cette fonction permet de faire un virement interne à la banque",
+        "description": "",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Transfer",
+            "description": "Cette fonction permet de faire un virement interne à la banque. Pour le virement en interne, si tout est bon dans la forme, le virement est effectué et on retourne à l'utilisateur un simple message de confirmation.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Transfer_intern"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfert réussit"
+          },
+          "400": {
+            "description": "Une erreur est survenue"
+          }
+        },
+        "security": [
+          {
+            "user_auth": [
+              "write:users",
+              "read:users"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/transfer_extern": {
+      "post": {
+        "tags": [
+          "BANQUE"
+        ],
+        "summary": "Cette fonction permet de faire un virement externe à la banque",
+        "description": "",
+        "produces": [
+          "application/xml",
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Transfer",
+            "description": "Cette fonction permet de faire un virement interne à la banque. Pour le virement en externe :\n Lui envoyer la même requête que l'on vient de recevoir, en remplaçant le JWT par le code de la banque.\n Attendre confirmation de sa part (puisque l'on a contacté la banque du destinataire, pour lui il va s'agir d'un virement local qu'il va traiter sans rediriger à son tour vers une n-ième banque).\n Réaliser le virement localement si l'autre banque à confirmé ne pas le faire si la banque à refusé.\n Retourner l'information à l'utilisateur. ",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Transfer_extern"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfert réussit"
+          },
+          "400": {
+            "description": "Une erreur est survenue"
+          }
+        },
+        "security": [
+          {
+            "user_auth": [
+              "write:users",
+              "read:users"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "user_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "localhost:8000",
+      "flow": "implicit",
+      "scopes": {
+        "write:users": "modify users",
+        "read:users": "read users"
+      }
+    },
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "User_register": {
+      "type": "object",
+      "properties": {
+        "numberAccount": {
+          "type": "string",
+          "description": "Numéro de compte de l'utilisateur qui servira ici de login"
+        },
+        "code": {
+          "type": "string",
+          "description": "Code pin de l'utilisateur qui servira ici de mot de passe"
+        },
+        "name": {
+          "type": "string",
+          "description": "Nom de l'utilisateur"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "Prénom de l'utilisateur"
+        },
+        "birthDate": {
+          "type": "string",
+          "description": "Date de naissance de l'utilisateur"
+        },
+        "adress": {
+          "type": "string",
+          "description": "Adresse de l'utilisateur"
+        },
+        "Sold": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Solde du compte de l'utilisateur"
+        }
+      },
+      "xml": {
+        "name": "User"
+      }
+    },
+    "User_login": {
+      "type": "object",
+      "properties": {
+        "numberAccount": {
+          "type": "string",
+          "description": "Numéro de compte de l'utilisateur qui servira ici de login"
+        },
+        "code": {
+          "type": "string",
+          "description": "Code pin de l'utilisateur qui servira ici de mot de passe"
+        }
+      },
+      "xml": {
+        "name": "User"
+      }
+    },
+    "Money": {
+      "type": "object",
+      "properties": {
+        "numberAccount": {
+          "type": "string",
+          "description": "Numéro de compte de l'utilisateur qui servira ici de login"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date de la transaction"
+        },
+        "sold": {
+          "type": "string",
+          "description": "Si le solde est positif, c'est un dépot, s'il est négatif, c'est un retrait."
+        }
+      },
+      "xml": {
+        "name": "User"
+      }
+    },
+    "Transfer_intern": {
+      "type": "object",
+      "properties": {
+        "compteEmetteur": {
+          "type": "string",
+          "description": "Compte qui envoie l'argent"
+        },
+        "compteRecepteur": {
+          "type": "string",
+          "description": "compte qui reçoit l'argent"
+        },
+        "sold": {
+          "type": "string",
+          "description": "Montant du transfert"
+        }
+      },
+      "xml": {
+        "name": "User"
+      }
+    },
+    "Transfer_extern": {
+      "type": "object",
+      "properties": {
+        "compteEmetteur": {
+          "type": "string",
+          "description": "Compte qui envoie l'argent"
+        },
+        "compteRecepteur": {
+          "type": "string",
+          "description": "compte qui reçoit l'argent"
+        },
+        "sold": {
+          "type": "string",
+          "description": "Montant du transfert"
+        }
+      },
+      "xml": {
+        "name": "User"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  }
+}
