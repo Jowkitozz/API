@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TransferController extends AbstractController
@@ -28,6 +29,8 @@ class TransferController extends AbstractController
         $recepteur = $em->getRepository(User::class)->findOneBy(array('numberAccount' => $Recepteur));
         $recepteur->setSold($recepteur->getSold() + $Solde);
         $em->flush();
+
+        return new Response(sprintf('le compte : %s€ à viré au compte : %s d\' un montant de : %s', $emetteur->getNumberAccount(), $recepteur->getNumberAccount(), $Solde));
 
     }
 }
