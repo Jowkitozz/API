@@ -14,6 +14,10 @@ depotRetrait:
     path: /api/depotRetrait
     controller: App\Controller\DepotRetraitController::DepotRetrait
 
+transfer:
+    path: /api/transfer_intern
+    controller: App\Controller\TransferController::intern
+
 
 login_check:
     path:     /login_check
